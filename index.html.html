@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0,minimum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    <script>
+
+        {
+            let obj = {
+                "name_": "xiaoxiao",
+                "age": 36
+            }
+            // Proxy里面的参数为要访问的目标对象和要执行的拦截的具体操作（13种）
+            let proxy = new Proxy(obj, {
+                // get方法（是用来拦截访问）里面的参数依次为目标对象，要访问的属性名，proxy对象本身
+                get: function (target, name, self) {
+                    console.log(target, name, self);
+                    if (name === 'age') {
+                        return 18;
+                    }
+                },
+                //set操作是在要修改目标对象里的属性值时触发的操作，
+                //默认参数有目标对象（target），要修改值的属性名（name），要修改的值（value），proxy目标本身（可选参数）；
+                set: function (target, name, value) {
+                    console.log(target, name, value);
+                    //如果要修改的属性是name的话就抛出错误，name不能修改；
+                    if (name === 'name') {
+                        throw "name禁止修改";
+                    } else if (value > 30) {
+                        alert('不能大于三十岁');
+                    }
+                    //如果要修改的值不是name的值，就直接把值赋值给该属性
+                    target[name] = value;
+                },
+                has(target, name) {
+                    console.log(target, name);
+                    if (target[name] === undefined) {
+                        throw `${name}不存在`;
+                    }
+                },
+                deleteProperty(target, name) {
+                    console.log(target, name);
+                    if (name === 'age') {
+                        throw "该属性不能删除";
+                    }
+                    delete target[name];
+                }
+
+            })
+            //get操作
+            let res = proxy.age;//因为在访问目标对象之前已经有了拦截操作，所以访问目标对象时要经过Proxy来访问，所以不能直接经过obj对象来访问该对象的属性
+            console.log(res);
+            //set操作
+            // proxy.age = 31;
+            console.log(obj, proxy);
+            //has 操作(in运算符是用来检测该属性是否存在于该对象里如果存在返回true，否则返回false)
+            // let flay = 'agesss' in proxy;
+            // console.log(flay);
+            // 'agesss' in proxy;
+            //deleat操作（当要删除目标对象里的某些属性时触发的拦截操作）
+            delete proxy.name_;
+            console.log(proxy);
+
+        }
+        //apply（在调用函数时触发的拦截操作，必须是独立的函数）
+        {
+            let fn = (x, y) => {
+                console.log('来啦老弟~~~');
+            }
+            let pro = new Proxy(fn, {
+                //参数分别是目标对象（target），目标对象的上下文对象（ctx）this，参数的数组（args）；
+                //没有上下文对象 返回undefined；
+                apply(target, ctx, args) {
+                    console.log(target, ctx, args);
+                    console.log(args);
+                }
+            });
+            pro(0, 1);
+        }
+
+
+
+    </script>
+</body>
+
+</html>
